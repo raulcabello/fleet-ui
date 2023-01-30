@@ -1,0 +1,37 @@
+@import './base.css';
+
+#app {
+  width: 1280px;
+  height: 100%;
+  display: flex;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  transition: 0.4s;
+
+}
+
+html {
+  height: 100%;
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    height: 100%;
+  }
+
+  #app {
+    width: 100%;
+    height: 100%;
+  }
+}

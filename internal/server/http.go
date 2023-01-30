@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/raulcabello/fleet-ui/internal/client"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 )
@@ -23,8 +24,10 @@ func (s *HTTP) Start() {
 	//s.router.GET("/gitrepos/:namespace/:name", s.getGitRepos)
 	s.router.GET("/bundles/:namespace", s.getBundles)
 	s.router.GET("/bundles/:namespace/:name", s.getBundle)
+	// Add CORS support (Cross Origin Resource Sharing)
+	handler := cors.Default().Handler(s.router)
 
-	log.Fatal(http.ListenAndServe(":8080", s.router))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
 func (s *HTTP) getGitRepos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

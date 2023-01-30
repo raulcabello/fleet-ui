@@ -17,6 +17,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/rancher/fleet v0.5.1
 	github.com/rancher/fleet/pkg/apis v0.0.0
+	github.com/rs/cors v1.8.3
 	k8s.io/apimachinery v0.25.0
 	sigs.k8s.io/controller-runtime v0.11.0
 )

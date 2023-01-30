@@ -25,7 +25,7 @@ func convertGitRepoList(v1alpha1GitRepoList *v1alpha1.GitRepoList) *GitRepoList 
 			RepoName:      item.Spec.Repo,
 			RepoCommit:    item.Spec.Branch + "@" + item.Spec.Revision,
 			ClustersReady: "11", //TODO
-			Resources:     string(rune(len(item.Status.Resources))),
+			Resources:     "2",  //TODO string(len(item.Status.Resources)),
 			Age:           item.CreationTimestamp.String(),
 		}
 		gitRepoList.Items = append(gitRepoList.Items, gitRepoListItem)
