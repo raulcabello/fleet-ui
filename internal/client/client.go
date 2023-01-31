@@ -44,3 +44,20 @@ func (c *Client) GetGitRepoList(namespace string) (*GitRepoList, error) {
 	}
 	return convertGitRepoList(list), nil
 }
+
+func (c *Client) CreateGitRepo(request *GitRepoRequest) error {
+	gitRepo := convertGitRepoRequest(request)
+	_, err := c.factory.Fleet().V1alpha1().GitRepo().Create(gitRepo)
+	return err
+}
+
+func (c *Client) DeleteGitRepos(gitRepoNames []string) error {
+	for _, name := range gitRepoNames {
+		err := c.factory.Fleet().V1alpha1().GitRepo().Delete("fleet-default", name, &v1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

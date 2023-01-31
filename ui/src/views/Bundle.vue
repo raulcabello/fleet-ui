@@ -1,46 +1,40 @@
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import axios from 'axios'
 
-export default {
-  mounted() {
-    axios.get('http://localhost:8080/bundles/fleet-default/'+this.name)
-        .then((response) => {
-          console.log(response.data)
-          this.bundles = response.data.items
-        })
-  },
-  data() {
-    return {
-      bundles: []
-    };
-  },
-  props:{
-    name: {type: String, required: true}
-  }
-}
+const props = defineProps(['name'])
+const bundle = ref([]) //TODO change array!
 
+console.log(props.name)
+onMounted(() => {
+  axios.get('http://localhost:8080/bundles/fleet-default/'+props.name)
+      .then((response) => {
+        bundle.value = response.data
+      })
+})
 </script>
 
 <template>
   <main>
-    <h1>Bundles</h1>
-    <div v-if="!bundles.length">
-      No Bundles!
+    <div v-if="!bundle">
+      No Bundle yet, please create one!
     </div>
     <div v-else>
-      change this for bundle!
+    <h1>Bundle: {{bundle.name}}</h1>
       <table>
         <tr>
           <th>State</th>
+          <th>API Version</th>
+          <th>Kind</th>
           <th>Name</th>
-          <th>Deployments</th>
-          <th>Age</th>
+          <th>Namespace</th>
         </tr>
-        <tr v-for="bundle in bundles" :key="bundle.name">
-          <td>{{ bundle.state }}</td>
-          <td>{{ bundle.name }}</td>
-          <td>{{ bundle.deployments }}</td>
-          <td>{{ bundle.age }}</td>
+        <tr v-for="resource in bundle.resources" :key="bundle.name">
+          <td>{{ resource.state }}</td>
+          <td>{{ resource.apiVersion }}</td>
+          <td>{{ resource.kind }}</td>
+          <td>{{ resource.name }}</td>
+          <td>{{ resource.namespace }}</td>
         </tr>
       </table>
     </div>

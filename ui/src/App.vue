@@ -26,7 +26,7 @@ import { RouterLink, RouterView } from 'vue-router'
     text-align: left;
     font-size: 1rem;
     padding: 1rem 1rem;
-    width: 160px;
+    width: 180px;
     height: 100%;
     border-right: green;
     border-right-style: solid;
@@ -50,7 +50,7 @@ import { RouterLink, RouterView } from 'vue-router'
   }
   .content-wrapper{
     width: 100%;
-    margin: 1rem;
+    margin: 2rem;
   }
   .title{
     height: 30px;

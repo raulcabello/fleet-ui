@@ -1,6 +1,9 @@
 package client
 
-import "github.com/rancher/fleet/pkg/apis/fleet.cattle.io/v1alpha1"
+import (
+	"github.com/rancher/fleet/pkg/apis/fleet.cattle.io/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 type GitRepoListItem struct {
 	State         string `json:"state"`
@@ -14,6 +17,22 @@ type GitRepoListItem struct {
 
 type GitRepoList struct {
 	Items []GitRepoListItem `json:"items"`
+}
+
+type GitRepoRequest struct {
+	Name                  string               `json:"name"`
+	RepoUrl               string               `json:"repoUrl"`
+	BranchName            string               `json:"branchName,omitempty"`
+	Revision              string               `json:"revision,omitempty"`
+	RepoName              string               `json:"repoName,omitempty"`
+	GitSecretName         string               `json:"state,omitempty"`
+	HelmSecretName        string               `json:"helmSecretName,omitempty"`
+	CABundle              string               `json:"CABundle,omitempty"`
+	InsecureSkipTLSVerify bool                 `json:"insecureSkipTLSVerify,omitempty"`
+	TargetNamespace       string               `json:"targetNamespace,omitempty"`
+	ServiceAccount        string               `json:"serviceAccount,omitempty"`
+	Paths                 []string             `json:"paths,omitempty"`
+	Targets               []v1alpha1.GitTarget `json:"targets,omitempty"`
 }
 
 func convertGitRepoList(v1alpha1GitRepoList *v1alpha1.GitRepoList) *GitRepoList {
@@ -32,4 +51,29 @@ func convertGitRepoList(v1alpha1GitRepoList *v1alpha1.GitRepoList) *GitRepoList 
 	}
 
 	return gitRepoList
+}
+
+func convertGitRepoRequest(request *GitRepoRequest) *v1alpha1.GitRepo {
+	gitrepo := &v1alpha1.GitRepo{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      request.Name,
+			Namespace: "fleet-default",
+		},
+		Spec: v1alpha1.GitRepoSpec{
+			Repo:                  request.RepoUrl,
+			Branch:                request.BranchName,
+			Revision:              request.Revision,
+			TargetNamespace:       request.TargetNamespace,
+			ClientSecretName:      request.GitSecretName,
+			HelmSecretName:        request.HelmSecretName,
+			CABundle:              []byte(request.CABundle),
+			InsecureSkipTLSverify: request.InsecureSkipTLSVerify,
+			Paths:                 request.Paths,
+			Paused:                false, //TODO?
+			ServiceAccount:        request.ServiceAccount,
+			Targets:               request.Targets,
+		},
+	}
+
+	return gitrepo
 }

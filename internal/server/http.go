@@ -21,11 +21,13 @@ func NewHttp(client *client.Client) HTTP {
 
 func (s *HTTP) Start() {
 	s.router.GET("/gitrepos/:namespace", s.getGitRepos)
-	//s.router.GET("/gitrepos/:namespace/:name", s.getGitRepos)
 	s.router.GET("/bundles/:namespace", s.getBundles)
 	s.router.GET("/bundles/:namespace/:name", s.getBundle)
-	// Add CORS support (Cross Origin Resource Sharing)
-	handler := cors.Default().Handler(s.router)
+	s.router.POST("/gitrepo", s.createGitRepo)
+	s.router.DELETE("/gitrepos", s.deleteGitRepos)
+
+	// TODO Add CORS support (Cross Origin Resource Sharing)
+	handler := cors.AllowAll().Handler(s.router)
 
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
@@ -72,18 +74,34 @@ func (s *HTTP) getBundle(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	w.Write(data) //TODO handle error
 }
 
-/*
-func (s *HTTP) getGitRepo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	list, err := s.client.GetGitRepo(ps.ByName("namespace"))
+func (s *HTTP) createGitRepo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	gitRepoRequest := &client.GitRepoRequest{}
+	err := json.NewDecoder(r.Body).Decode(gitRepoRequest)
 	if err != nil {
-		fmt.Fprintf(w, "error!") //TODO
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	data, err := json.Marshal(list)
+	err = s.client.CreateGitRepo(gitRepoRequest)
 	if err != nil {
-		fmt.Fprintf(w, "error!") //TODO
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	w.Write(data) //TODO handle error
 }
-*/
+
+func (s *HTTP) deleteGitRepos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var gitRepoNames []string
+	err := json.NewDecoder(r.Body).Decode(&gitRepoNames)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = s.client.DeleteGitRepos(gitRepoNames)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+}

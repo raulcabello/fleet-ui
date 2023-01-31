@@ -11,7 +11,9 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.6",
     "axios": "^1.2.6",
+    "bootstrap": "^5.2.3",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

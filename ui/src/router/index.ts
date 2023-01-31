@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import GitRepos from '../views/GitRepos.vue'
 import Bundles from '../views/Bundles.vue'
 import Bundle from '../views/Bundle.vue'
+import CreateGitRepo from "@/views/CreateGitRepo.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +22,11 @@ const router = createRouter({
       name: 'bundle',
       component: Bundle,
       props: true
+    },
+    {
+      path: '/creategitrepo',
+      name: 'creategitrepo',
+      component: CreateGitRepo
     },
     {
       path: '/about',
