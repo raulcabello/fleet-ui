@@ -1,8 +1,9 @@
 <script setup>
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import axios from 'axios'
 
 const gitRepos = ref([])
+const isAnyGitRepoSelected = computed(() => gitRepos.value.filter(r => r.checked).length)
 
 function deleteGitRepos() {
   console.log(gitRepos.value.filter(r => r.checked).map(r => r.name))
@@ -29,38 +30,50 @@ onMounted(() => {
 
 <template>
   <main>
-    <h1>Git Repos</h1>
+    <div v-if="!gitRepos.length" class="fleet-empty mt-5">
+      <h3>Welcome to Fleet Continuous Delivery</h3>
+      <p>GitOps at scale. <a href="https://fleet.rancher.io/" target="_blank">Learn More</a></p>
+      <p>You don't have any Git Repositories in your Workspaces</p>
+      <router-link class="btn btn-outline-success" to="/creategitrepo">Add Repository</router-link>
 
-    <div v-if="!gitRepos.length">
-      No GitRepos yet, please create one!
     </div>
     <div v-else>
-      <a class="btn btn-secondary" @click="deleteGitRepos">Delete</a>
-      <table>
-        <tr>
-          <th><input class="form-check-input" type="checkbox" value="" @change="selectAll($event)"></th>
-          <th>State</th>
-          <th>Name</th>
-          <th>Repo</th>
-          <th>Clusters Ready</th>
-          <th>Resources</th>
-          <th>Age</th>
-        </tr>
-        <tr v-for="gitRepo in gitRepos" :key="gitRepos.name">
-          <th><input class="form-check-input" type="checkbox" value="" v-model="gitRepo.checked"></th>
-          <td>{{ gitRepo.state }}</td>
-          <td>{{ gitRepo.name }}</td>
-          <td>{{ gitRepo.repoName }}</td>
-          <td>{{ gitRepo.clustersReady }}</td>
-          <td>{{ gitRepo.resources }}</td>
-          <td>{{ gitRepo.age }}</td>
-        </tr>
+      <h4>Git Repos</h4>
+      <hr class="mt-1 mb-1"/>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th scope="col"><input class="form-check-input" type="checkbox" value="" @change="selectAll($event)"></th>
+            <th scope="col">State</th>
+            <th scope="col">Name</th>
+            <th scope="col">Repo</th>
+            <th scope="col">Clusters Ready</th>
+            <th scope="col">Resources</th>
+            <th scope="col">Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="gitRepo in gitRepos" :key="gitRepos.name">
+            <th><input class="form-check-input" type="checkbox" value="" v-model="gitRepo.checked"></th>
+            <td>{{ gitRepo.state }}</td>
+            <td> <router-link :to="{ name: 'gitrepo', params: {name: gitRepo.name } }">{{ gitRepo.name }}</router-link></td>
+            <td>{{ gitRepo.repoName }}</td>
+            <td>{{ gitRepo.clustersReady }}</td>
+            <td>{{ gitRepo.resources }}</td>
+            <td>{{ gitRepo.age }}</td>
+          </tr>
+        </tbody>
       </table>
+      <div class="mt-4">
+        <a v-if="isAnyGitRepoSelected" class="btn btn-outline-secondary btn-sm me-3" @click="deleteGitRepos">Delete</a>
+        <router-link class="btn btn-outline-success btn-sm" to="/creategitrepo">Add Repository</router-link>
+      </div>
     </div>
-    <br/>
-    <router-link to="/creategitrepo">Add Repository</router-link>
-  </main>
+    </main>
 </template>
 
 <style>
+.fleet-empty{
+  text-align: center;
+}
 </style>

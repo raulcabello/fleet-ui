@@ -72,12 +72,3 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-table, th, td {
-  border: 1px solid;
-}
-table {
-  margin-top: 1rem;
-  width: 100%;
-  border-collapse: collapse;
-}

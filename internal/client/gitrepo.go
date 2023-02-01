@@ -35,6 +35,68 @@ type GitRepoRequest struct {
 	Targets               []v1alpha1.GitTarget `json:"targets,omitempty"`
 }
 
+type ResourceCount struct {
+	DesiredReady int `json:"desiredReady"`
+	Missing      int `json:"missing"`
+	Modified     int `json:"modified"`
+	NotReady     int `json:"notReady"`
+	Orphaned     int `json:"orphaned"`
+	Ready        int `json:"ready"`
+	Unknown      int `json:"Unknown"`
+	WaitApplaied int `json:"waitApplaied"`
+}
+
+type GitRepoResources struct {
+	State      string `json:"state"`
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Name       string `json:"name"`
+	Namespace  string `json:"namespace"` //TODO
+	Cluster    string `json:"cluster"`   //TODO
+}
+
+type GitRepo struct {
+	Name          string             `json:"name"`
+	Age           string             `json:"age"`
+	ResourceCount ResourceCount      `json:"resourceCount"`
+	Resources     []GitRepoResources `json:"resources"`
+	Bundles       []*Bundle          `json:"bundles"`
+}
+
+func convertGitRepo(v1alpha1GitRepo *v1alpha1.GitRepo, bundles *v1alpha1.BundleList) *GitRepo {
+	resources := []GitRepoResources{}
+	for _, resource := range v1alpha1GitRepo.Status.Resources {
+		resources = append(resources, GitRepoResources{
+			State:      resource.State,
+			APIVersion: resource.APIVersion,
+			Kind:       resource.Kind,
+			Name:       resource.Name,
+			Namespace:  "",
+			Cluster:    "",
+		})
+	}
+	bundlesList := []*Bundle{}
+	for _, bundle := range bundles.Items {
+		bundlesList = append(bundlesList, convertBundle(&bundle))
+	}
+	return &GitRepo{
+		Name: v1alpha1GitRepo.Name,
+		Age:  v1alpha1GitRepo.CreationTimestamp.String(),
+		ResourceCount: ResourceCount{
+			DesiredReady: v1alpha1GitRepo.Status.ResourceCounts.DesiredReady,
+			Missing:      v1alpha1GitRepo.Status.ResourceCounts.Missing,
+			Modified:     v1alpha1GitRepo.Status.ResourceCounts.Modified,
+			NotReady:     v1alpha1GitRepo.Status.ResourceCounts.NotReady,
+			Orphaned:     v1alpha1GitRepo.Status.ResourceCounts.Orphaned,
+			Ready:        v1alpha1GitRepo.Status.ResourceCounts.Ready,
+			Unknown:      v1alpha1GitRepo.Status.ResourceCounts.Unknown,
+			WaitApplaied: v1alpha1GitRepo.Status.ResourceCounts.WaitApplied,
+		},
+		Resources: resources,
+		Bundles:   bundlesList,
+	}
+}
+
 func convertGitRepoList(v1alpha1GitRepoList *v1alpha1.GitRepoList) *GitRepoList {
 	gitRepoList := &GitRepoList{}
 	for _, item := range v1alpha1GitRepoList.Items {

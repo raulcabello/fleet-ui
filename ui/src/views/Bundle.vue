@@ -3,9 +3,8 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios'
 
 const props = defineProps(['name'])
-const bundle = ref([]) //TODO change array!
+const bundle = ref([])
 
-console.log(props.name)
 onMounted(() => {
   axios.get('http://localhost:8080/bundles/fleet-default/'+props.name)
       .then((response) => {

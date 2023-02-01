@@ -3,6 +3,8 @@ package client
 import (
 	fleetcontrollers "github.com/rancher/fleet/pkg/generated/controllers/fleet.cattle.io"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/watch"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -37,6 +39,17 @@ func (c *Client) GetBundle(namespace, name string) (*Bundle, error) {
 	return convertBundle(bundle), nil
 }
 
+func (c *Client) GetGitRepo(namespace, name string) (*GitRepo, error) {
+	gitrepo, err := c.factory.Fleet().V1alpha1().GitRepo().Get(namespace, name, v1.GetOptions{})
+	labelSelector := v1.LabelSelector{MatchLabels: map[string]string{"fleet.cattle.io/repo-name": name}}
+	bundles, err := c.factory.Fleet().V1alpha1().Bundle().List(namespace, v1.ListOptions{LabelSelector: labels.Set(labelSelector.MatchLabels).String()})
+
+	if err != nil {
+		return nil, err
+	}
+	return convertGitRepo(gitrepo, bundles), nil
+}
+
 func (c *Client) GetGitRepoList(namespace string) (*GitRepoList, error) {
 	list, err := c.factory.Fleet().V1alpha1().GitRepo().List(namespace, v1.ListOptions{})
 	if err != nil {
@@ -58,6 +71,9 @@ func (c *Client) DeleteGitRepos(gitRepoNames []string) error {
 			return err
 		}
 	}
-
 	return nil
+}
+
+func (c *Client) WatchGitRepo(namespace string) (watch.Interface, error) {
+	return c.factory.Fleet().V1alpha1().GitRepo().Watch(namespace, v1.ListOptions{})
 }

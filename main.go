@@ -14,9 +14,5 @@ func main() {
 
 	httpServer := server.NewHttp(client)
 	httpServer.Start()
-	/*	fmt.Println(client.GetBundleList("fleet-default"))
-		fmt.Println(client.GetBundle("fleet-default", "test-simple"))
-		fmt.Println(client.GetGitRepoList("fleet-default"))
-	*/
-	//	fmt.Println(fc.Fleet().V1alpha1().Bundle().Cache().List("", labels.Everything()))
+
 }
