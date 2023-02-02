@@ -1,6 +1,7 @@
 <script setup>
 import {ref, onMounted, computed} from 'vue';
 import axios from 'axios'
+import moment from "moment";
 
 const gitRepos = ref([])
 const isAnyGitRepoSelected = computed(() => gitRepos.value.filter(r => r.checked).length)
@@ -53,15 +54,17 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="gitRepo in gitRepos" :key="gitRepos.name">
-            <th><input class="form-check-input" type="checkbox" value="" v-model="gitRepo.checked"></th>
-            <td>{{ gitRepo.state }}</td>
-            <td> <router-link :to="{ name: 'gitrepo', params: {name: gitRepo.name } }">{{ gitRepo.name }}</router-link></td>
-            <td>{{ gitRepo.repoName }}</td>
-            <td>{{ gitRepo.clustersReady }}</td>
-            <td>{{ gitRepo.resources }}</td>
-            <td>{{ gitRepo.age }}</td>
-          </tr>
+          <template v-for="gitRepo in gitRepos" :key="gitRepos.name">
+            <tr>
+              <th><input class="form-check-input" type="checkbox" value="" v-model="gitRepo.checked"></th>
+              <td>{{ gitRepo.state }}</td>
+              <td> <router-link :to="{ name: 'gitrepo', params: {name: gitRepo.name } }">{{ gitRepo.name }}</router-link></td>
+              <td>{{ gitRepo.repoName }}</td>
+              <td>{{ gitRepo.clustersReady }}</td>
+              <td>{{ gitRepo.resourcesDesiredReady }} / {{ gitRepo.resourcesReady }}</td>
+              <td>{{ moment(gitRepo.age, "YYYY-MM-DD hh:mm:ss").fromNow(true)}}</td>
+            </tr>
+          </template>
         </tbody>
       </table>
       <div class="mt-4">

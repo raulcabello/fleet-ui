@@ -4,6 +4,8 @@ import Bundles from '../views/Bundles.vue'
 import Bundle from '../views/Bundle.vue'
 import CreateGitRepo from "@/views/CreateGitRepo.vue";
 import GitRepo from "@/views/GitRepo.vue";
+import Clusters from "@/views/Clusters.vue";
+import ClustersGroup from "@/views/ClustersGroup.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,12 +38,14 @@ const router = createRouter({
       props: true
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
+      path: '/clusters',
+      name: 'cluster',
+      component: Clusters
+    },
+    {
+      path: '/clustergroups',
+      name: 'clustergroups',
+      component: ClustersGroup
     }
   ]
 })

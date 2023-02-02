@@ -14,7 +14,6 @@ const resources = computed(() => {
     <thead>
     <tr>
       <th scope="col">State</th>
-      <th scope="col">Cluster</th>
       <th scope="col">API Version</th>
       <th scope="col">Kind</th>
       <th scope="col">Name</th>
@@ -24,7 +23,6 @@ const resources = computed(() => {
     <tbody>
     <tr v-for="resource in resources" :key="resource.name">
       <td>{{ resource.state }}</td>
-      <td>{{ resource.cluster }}</td>
       <td>{{ resource.apiVersion }}</td>
       <td>{{ resource.kind }}</td>
       <td>{{ resource.name }}</td>

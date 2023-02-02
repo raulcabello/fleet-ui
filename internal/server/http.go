@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rancher/fleet/pkg/apis/fleet.cattle.io/v1alpha1"
 	"github.com/raulcabello/fleet-ui/internal/client"
 	"github.com/rs/cors"
 	"log"
@@ -27,7 +28,8 @@ func (s *HTTP) Start() {
 	s.router.POST("/gitrepo", s.createGitRepo)
 	s.router.DELETE("/gitrepos", s.deleteGitRepos)
 	s.router.GET("/gitrepo/:namespace/:name", s.getGitRepo)
-	s.router.GET("/ws", s.ws)
+	s.router.GET("/ws/gitrepo/:name", s.wsGitRepo)
+	s.router.GET("/ws/bundles/:repoName", s.wsBundles)
 
 	// TODO Add CORS support (Cross Origin Resource Sharing)
 	handler := cors.AllowAll().Handler(s.router)
@@ -124,13 +126,20 @@ func (s *HTTP) getGitRepo(w http.ResponseWriter, r *http.Request, ps httprouter.
 
 }
 
-var upgrader = websocket.Upgrader{}
+func (s *HTTP) wsGitRepo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	upgrader := websocket.Upgrader{}
 
-func (s *HTTP) ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	ws, _ := upgrader.Upgrade(w, r, nil)
+	//TODO handle CORS!
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Fprintf(w, "error!") //TODO
+		return
+	}
 	defer ws.Close()
 
-	watcher, err := s.client.WatchGitRepo("fleet-default")
+	//filter by label name!
+	watcher, err := s.client.WatchGitRepo("fleet-default", ps.ByName("name"))
 	if err != nil {
 		fmt.Fprintf(w, "error!") //TODO
 		return
@@ -139,12 +148,21 @@ func (s *HTTP) ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		select {
 		case event := <-watcher.ResultChan():
 			fmt.Println(event)
-			bytes, err := json.Marshal(event)
-			if err != nil {
+
+			v1alpha1GitRepo, ok := event.Object.(*v1alpha1.GitRepo)
+			if !ok {
+				// TODO exit for!
 				fmt.Println(err.Error())
 				return
 			}
 
+			gitRepo := client.ConvertGitRepo(v1alpha1GitRepo, &v1alpha1.BundleList{})
+			bytes, err := json.Marshal(gitRepo)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			//check event modified
 			err = ws.WriteMessage(websocket.TextMessage, bytes)
 			if err != nil {
 				// TODO exit for!
@@ -153,23 +171,50 @@ func (s *HTTP) ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			}
 		}
 	}
+}
 
-	/*ticker := time.NewTicker(2 * time.Second)
-	quit := make(chan struct{})
+func (s *HTTP) wsBundles(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	upgrader := websocket.Upgrader{}
 
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
+	//TODO handle CORS!
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Fprintf(w, "error!") //TODO
+		return
+	}
+	defer ws.Close()
 
+	watcher, err := s.client.WatchBundles("fleet-default", ps.ByName("repoName"))
+	if err != nil {
+		fmt.Fprintf(w, "error!") //TODO
+		return
+	}
 	for {
 		select {
-		case <-ticker.C:
-			fmt.Println("meess")
-			err := ws.WriteMessage(websocket.TextMessage, []byte("message "+strconv.Itoa(r1.Int())))
-			fmt.Println(err)
-			//close connection when write: broken pipe ?
-		case <-quit:
-			ticker.Stop()
-			return
+		case event := <-watcher.ResultChan():
+			fmt.Println(event)
+
+			v1alpha1Bundle, ok := event.Object.(*v1alpha1.Bundle)
+			if !ok {
+				// TODO exit for!
+				fmt.Println(err.Error())
+				return
+			}
+
+			bundle := client.ConvertBundle(v1alpha1Bundle)
+			bytes, err := json.Marshal(bundle)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			//check event modified
+			err = ws.WriteMessage(websocket.TextMessage, bytes)
+			if err != nil {
+				// TODO exit for!
+				fmt.Println(err.Error())
+				return
+			}
 		}
-	}*/
+	}
 }

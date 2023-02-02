@@ -25,7 +25,8 @@ type Bundle struct {
 	State       string           `json:"state"`
 	Name        string           `json:"name"`
 	Deployments string           `json:"deployments"`
-	Age         string           `json:"age"`
+	Date        string           `json:"date"`
+	LastUpdated string           `json:"lastUpdated"`
 	Resources   []BundleResource `json:"resources"`
 }
 
@@ -44,12 +45,16 @@ func convertBundleList(v1alpha1BundleList *v1alpha1.BundleList) *BundleList {
 	return bundleList
 }
 
-func convertBundle(v1alpha1Bundle *v1alpha1.Bundle) *Bundle {
+func ConvertBundle(v1alpha1Bundle *v1alpha1.Bundle) *Bundle {
+	state := v1alpha1Bundle.Status.Display.State
+	if v1alpha1Bundle.Status.Summary.DesiredReady == v1alpha1Bundle.Status.Summary.Ready && v1alpha1Bundle.Status.Display.State == "" {
+		state = "Active"
+	}
 	bundle := &Bundle{
-		State:       "active", //TODO! check rancher code!
+		State:       state,
 		Name:        v1alpha1Bundle.Name,
-		Deployments: "active",                                  //TODO! check rancher code!
-		Age:         v1alpha1Bundle.CreationTimestamp.String(), //TODO! check rancher code!
+		Deployments: v1alpha1Bundle.Status.Display.ReadyClusters,
+		Date:        v1alpha1Bundle.CreationTimestamp.String(),
 	}
 
 	for _, resource := range v1alpha1Bundle.Spec.Resources {

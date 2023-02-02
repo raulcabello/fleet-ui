@@ -2,17 +2,20 @@ package client
 
 import (
 	"github.com/rancher/fleet/pkg/apis/fleet.cattle.io/v1alpha1"
+	"github.com/rancher/wrangler/pkg/genericcondition"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type GitRepoListItem struct {
-	State         string `json:"state"`
-	Name          string `json:"name"`
-	RepoName      string `json:"repoName"`
-	RepoCommit    string `json:"repoCommit"`
-	ClustersReady string `json:"clustersReady"`
-	Resources     string `json:"resources"`
-	Age           string `json:"age"`
+	State                 string `json:"state"`
+	Name                  string `json:"name"`
+	RepoName              string `json:"repoName"`
+	RepoCommit            string `json:"repoCommit"`
+	ClustersReady         string `json:"clustersReady"`
+	ResourcesDesiredReady int    `json:"resourcesDesiredReady"`
+	ResourcesReady        int    `json:"resourcesReady"`
+	Age                   string `json:"age"`
 }
 
 type GitRepoList struct {
@@ -56,32 +59,36 @@ type GitRepoResources struct {
 }
 
 type GitRepo struct {
-	Name          string             `json:"name"`
-	Age           string             `json:"age"`
-	ResourceCount ResourceCount      `json:"resourceCount"`
-	Resources     []GitRepoResources `json:"resources"`
-	Bundles       []*Bundle          `json:"bundles"`
+	Name                string                              `json:"name"`
+	Age                 string                              `json:"age"`
+	DisplayBundlesReady string                              `json:"displayBundlesReady"`
+	ResourceCount       ResourceCount                       `json:"resourceCount"`
+	Resources           []GitRepoResources                  `json:"resources"`
+	Bundles             []*Bundle                           `json:"bundles"`
+	Conditions          []genericcondition.GenericCondition `json:"conditions"`
 }
 
-func convertGitRepo(v1alpha1GitRepo *v1alpha1.GitRepo, bundles *v1alpha1.BundleList) *GitRepo {
+func ConvertGitRepo(v1alpha1GitRepo *v1alpha1.GitRepo, bundles *v1alpha1.BundleList) *GitRepo {
 	resources := []GitRepoResources{}
 	for _, resource := range v1alpha1GitRepo.Status.Resources {
+		namespace, _, _ := strings.Cut(resource.ID, "/")
 		resources = append(resources, GitRepoResources{
 			State:      resource.State,
 			APIVersion: resource.APIVersion,
 			Kind:       resource.Kind,
 			Name:       resource.Name,
-			Namespace:  "",
-			Cluster:    "",
+			Namespace:  namespace,
+			Cluster:    "", //TODO
 		})
 	}
 	bundlesList := []*Bundle{}
 	for _, bundle := range bundles.Items {
-		bundlesList = append(bundlesList, convertBundle(&bundle))
+		bundlesList = append(bundlesList, ConvertBundle(&bundle))
 	}
 	return &GitRepo{
-		Name: v1alpha1GitRepo.Name,
-		Age:  v1alpha1GitRepo.CreationTimestamp.String(),
+		Name:                v1alpha1GitRepo.Name,
+		Age:                 v1alpha1GitRepo.CreationTimestamp.String(),
+		DisplayBundlesReady: v1alpha1GitRepo.Status.Display.ReadyBundleDeployments,
 		ResourceCount: ResourceCount{
 			DesiredReady: v1alpha1GitRepo.Status.ResourceCounts.DesiredReady,
 			Missing:      v1alpha1GitRepo.Status.ResourceCounts.Missing,
@@ -92,22 +99,28 @@ func convertGitRepo(v1alpha1GitRepo *v1alpha1.GitRepo, bundles *v1alpha1.BundleL
 			Unknown:      v1alpha1GitRepo.Status.ResourceCounts.Unknown,
 			WaitApplaied: v1alpha1GitRepo.Status.ResourceCounts.WaitApplied,
 		},
-		Resources: resources,
-		Bundles:   bundlesList,
+		Resources:  resources,
+		Bundles:    bundlesList,
+		Conditions: v1alpha1GitRepo.Status.Conditions,
 	}
 }
 
 func convertGitRepoList(v1alpha1GitRepoList *v1alpha1.GitRepoList) *GitRepoList {
 	gitRepoList := &GitRepoList{}
 	for _, item := range v1alpha1GitRepoList.Items {
+		state := item.Status.Display.State
+		if item.Status.DesiredReadyClusters == item.Status.ReadyClusters && item.Status.Display.State == "" {
+			state = "Active"
+		}
 		gitRepoListItem := GitRepoListItem{
-			State:         "active", //TODO! check rancher code!
-			Name:          item.Name,
-			RepoName:      item.Spec.Repo,
-			RepoCommit:    item.Spec.Branch + "@" + item.Spec.Revision,
-			ClustersReady: "11", //TODO
-			Resources:     "2",  //TODO string(len(item.Status.Resources)),
-			Age:           item.CreationTimestamp.String(),
+			State:                 state,
+			Name:                  item.Name,
+			RepoName:              item.Spec.Repo,
+			RepoCommit:            item.Spec.Branch + "@" + item.Spec.Revision,
+			ClustersReady:         item.Status.Display.ReadyBundleDeployments,
+			ResourcesDesiredReady: item.Status.ResourceCounts.DesiredReady,
+			ResourcesReady:        item.Status.ResourceCounts.DesiredReady,
+			Age:                   item.CreationTimestamp.String(),
 		}
 		gitRepoList.Items = append(gitRepoList.Items, gitRepoListItem)
 	}
