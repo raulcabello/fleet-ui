@@ -33,6 +33,7 @@ func (s *HTTP) Start() {
 	// TODO handle CORS
 	handler := cors.AllowAll().Handler(s.router)
 
+	log.Println("Starting server...")
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 

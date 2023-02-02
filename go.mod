@@ -3,7 +3,7 @@ module github.com/raulcabello/fleet-ui
 go 1.19
 
 replace (
-	github.com/rancher/fleet/pkg/apis => ../fleet/pkg/apis //TODO import from fleet
+	github.com/rancher/fleet/pkg/apis => ./fleet/pkg/apis //TODO import from fleet, remove copy!
 	helm.sh/helm/v3 => github.com/rancher/helm/v3 v3.9.0-rancher1
 	k8s.io/api => k8s.io/api v0.24.5
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.5

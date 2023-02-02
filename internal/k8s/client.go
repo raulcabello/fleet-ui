@@ -14,6 +14,7 @@ type Client struct {
 }
 
 func NewClient() (*Client, error) {
+	//TODO improve error message if it can't connect
 	config := ctrl.GetConfigOrDie()
 	factory, err := fleetcontrollers.NewFactoryFromConfig(config)
 	if err != nil {
