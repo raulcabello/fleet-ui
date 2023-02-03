@@ -8,6 +8,13 @@
 > This is for testing the alpha release, it will change!
 
 - Install `fleet`. See the [quick start](https://fleet.rancher.io/quickstart) for more info.
+```
+helm -n cattle-fleet-system install --create-namespace --wait \
+    fleet-crd https://github.com/rancher/fleet/releases/download/v0.5.0/fleet-crd-0.5.0.tgz
+helm -n cattle-fleet-system install --create-namespace --wait \
+    fleet https://github.com/rancher/fleet/releases/download/v0.5.0/fleet-0.5.0.tgz
+```
+
 - Install `fleet-ui` chart
 ```
 helm install fleet-ui https://github.com/raulcabello/fleet-ui-helm/releases/download/v0.0.1-alpha1/fleet-ui-0.0.1-alpha1.tgz  -n fleet-ui --create-namespace
