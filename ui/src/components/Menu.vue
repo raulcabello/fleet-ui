@@ -6,6 +6,8 @@ const namespace = ref("fleet-local")
 onMounted(() => {
   if (localStorage.namespace) {
     namespace.value = localStorage.namespace
+  } else {
+    localStorage.namespace = "fleet-local"
   }
 })
 
