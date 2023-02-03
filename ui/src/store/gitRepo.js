@@ -19,12 +19,12 @@ export const gitRepoStore = defineStore("gitRepo", {
         async fetchGitRepo(name) {
             const config = configStore()
             try {
-                const data = await axios.get('http://'+config.url+'/gitrepo/'+config.namespace+'/'+name)
+                const data = await axios.get('http://'+config.url+'/gitrepo/'+localStorage.namespace+'/'+name)
                 this.gitRepo = data.data
                 this.bundles = this.gitRepo.bundles
 
                 // watch for gitrepo changes
-                let socket = new WebSocket('ws://'+config.url+'/ws/gitrepo/'+config.namespace+'/'+name);
+                let socket = new WebSocket('ws://'+config.url+'/ws/gitrepo/'+localStorage.namespace+'/'+name);
 
                 socket.onmessage = (event) => {
                     this.gitRepo = JSON.parse(event.data)
@@ -34,7 +34,7 @@ export const gitRepoStore = defineStore("gitRepo", {
                 socket.onerror =  (event) => {};
 
                 // watch for gitrepo changes
-                let socketBundles = new WebSocket('ws://'+config.url+'/ws/bundles/'+config.namespace+'/'+name);
+                let socketBundles = new WebSocket('ws://'+config.url+'/ws/bundles/'+localStorage.namespace+'/'+name);
                 socketBundles.onmessage = (event) => {
                     let bundleFound = false
                     let newBundle = JSON.parse(event.data)
@@ -55,8 +55,7 @@ export const gitRepoStore = defineStore("gitRepo", {
             }
             catch (error) {
                 // TODO handle errors!
-                alert(error)
-                console.log(error)
+                alert(error.message)
             }
         }
     },

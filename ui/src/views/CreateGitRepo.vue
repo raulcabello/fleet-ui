@@ -42,15 +42,13 @@ function removePath(index) {
 function createGitRepo() {
   axios.post("http://"+config.url+"/gitrepo", {
     name: gitRepo.value.name,
+    namespace: localStorage.namespace,
     repoUrl: gitRepo.value.repoURL,
     paths: gitRepo.value.paths.map(path => path.value),
     targets: allTargets
   }).then(function (response) {
     router.push("/gitrepo/"+gitRepo.value.name)
   })
-  .catch(function (error) {
-    alert("err "+error);
-  });
 }
 
 function close() {

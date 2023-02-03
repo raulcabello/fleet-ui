@@ -9,8 +9,7 @@ const isAnyGitRepoSelected = computed(() => gitRepos.value.filter(r => r.checked
 const config = configStore()
 
 function deleteGitRepos() {
-  //TODO add namespace
-  axios.delete('http://'+config.url+'/gitrepos/', {
+  axios.delete('http://'+config.url+'/gitrepos/'+localStorage.namespace, {
     data: gitRepos.value.filter(r => r.checked).map(r => r.name),
   }).then((response)=> {
     location.reload()
@@ -24,7 +23,7 @@ function selectAll(e) {
 }
 
 onMounted(() => {
-  axios.get('http://'+config.url+'/gitrepos/'+config.namespace)
+  axios.get('http://'+config.url+'/gitrepos/'+localStorage.namespace)
       .then((response) => {
         gitRepos.value = response.data.items
       })

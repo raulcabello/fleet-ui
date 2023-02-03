@@ -65,9 +65,9 @@ func (c *Client) CreateGitRepo(request *GitRepoRequest) error {
 	return err
 }
 
-func (c *Client) DeleteGitRepos(gitRepoNames []string) error {
+func (c *Client) DeleteGitRepos(gitRepoNames []string, namespace string) error {
 	for _, name := range gitRepoNames {
-		err := c.factory.Fleet().V1alpha1().GitRepo().Delete("fleet-default", name, &v1.DeleteOptions{})
+		err := c.factory.Fleet().V1alpha1().GitRepo().Delete(namespace, name, &v1.DeleteOptions{})
 		if err != nil {
 			return err
 		}

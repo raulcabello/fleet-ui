@@ -24,6 +24,7 @@ type GitRepoList struct {
 
 type GitRepoRequest struct {
 	Name                  string               `json:"name"`
+	Namespace             string               `json:"namespace"`
 	RepoUrl               string               `json:"repoUrl"`
 	BranchName            string               `json:"branchName,omitempty"`
 	Revision              string               `json:"revision,omitempty"`
@@ -60,6 +61,7 @@ type GitRepoResources struct {
 
 type GitRepo struct {
 	Name                string                              `json:"name"`
+	State               string                              `json:"state"`
 	Age                 string                              `json:"age"`
 	DisplayBundlesReady string                              `json:"displayBundlesReady"`
 	ResourceCount       ResourceCount                       `json:"resourceCount"`
@@ -87,6 +89,7 @@ func ConvertGitRepo(v1alpha1GitRepo *v1alpha1.GitRepo, bundles *v1alpha1.BundleL
 	}
 	return &GitRepo{
 		Name:                v1alpha1GitRepo.Name,
+		State:               v1alpha1GitRepo.Status.Display.State,
 		Age:                 v1alpha1GitRepo.CreationTimestamp.String(),
 		DisplayBundlesReady: v1alpha1GitRepo.Status.Display.ReadyBundleDeployments,
 		ResourceCount: ResourceCount{
@@ -132,7 +135,7 @@ func convertGitRepoRequest(request *GitRepoRequest) *v1alpha1.GitRepo {
 	gitrepo := &v1alpha1.GitRepo{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      request.Name,
-			Namespace: "fleet-default",
+			Namespace: request.Namespace,
 		},
 		Spec: v1alpha1.GitRepoSpec{
 			Repo:                  request.RepoUrl,

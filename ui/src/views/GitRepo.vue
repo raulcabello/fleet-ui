@@ -24,13 +24,20 @@ onMounted(() => {
 <template>
   <main>
     <div >
-      <h4>Git Repo: {{store.gitRepo.name}}</h4>
+      <div class="d-flex justify-content-between">
+        <div>
+          <h4>Git Repo: {{store.gitRepo.name}}</h4>
+        </div>
+        <div>
+          {{store.gitRepo.state}}
+        </div>
+      </div>
       <div class="mt-4">
         <nav>
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Bundles {{store.gitRepo.displayBundlesReady}}</button>
-            <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Resources {{displayResourcesReady}}</button>
-            <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Conditions</button>
+            <button class="nav-link active link-success" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Bundles {{store.gitRepo.displayBundlesReady}}</button>
+            <button class="nav-link link-success" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Resources {{displayResourcesReady}}</button>
+            <button class="nav-link link-success" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Conditions</button>
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">

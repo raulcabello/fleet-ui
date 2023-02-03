@@ -25,7 +25,7 @@ func (s *HTTP) Start() {
 	s.router.GET("/bundles/:namespace", s.getBundles)
 	s.router.GET("/bundles/:namespace/:name", s.getBundle)
 	s.router.POST("/gitrepo", s.createGitRepo)
-	s.router.DELETE("/gitrepos", s.deleteGitRepos)
+	s.router.DELETE("/gitrepos/:namespace", s.deleteGitRepos)
 	s.router.GET("/gitrepo/:namespace/:name", s.getGitRepo)
 	s.router.GET("/ws/gitrepo/:namespace/:name", s.wsGitRepo)
 	s.router.GET("/ws/bundles/:namespace/:repoName", s.wsGitRepoBundles)
@@ -97,14 +97,14 @@ func (s *HTTP) createGitRepo(w http.ResponseWriter, r *http.Request, _ httproute
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (s *HTTP) deleteGitRepos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (s *HTTP) deleteGitRepos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var gitRepoNames []string
 	err := json.NewDecoder(r.Body).Decode(&gitRepoNames)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = s.client.DeleteGitRepos(gitRepoNames)
+	err = s.client.DeleteGitRepos(gitRepoNames, ps.ByName("namespace"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
