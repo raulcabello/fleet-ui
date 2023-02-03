@@ -21,7 +21,7 @@ function changeNamespace(e) {
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-sm navbar-light bg-light">
     <div class="container-fluid">
       <a href="#" class="navbar-brand">
         <img src="../assets/logo.svg" height="40" alt="Fleet">
